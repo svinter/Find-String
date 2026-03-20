@@ -1,0 +1,88 @@
+<!doctype html><html><head><meta charset="utf-8">
+<style>
+    body { font-family: -apple-system, system-ui; background: #f2f2f2; padding: 15px; margin: 0; overflow: hidden; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+    #q { width: 100%; padding: 10px; font-size: 18px; border-radius: 8px; border: 1px solid #ccc; text-align: center; outline: none; box-sizing: border-box; -webkit-appearance: none; }
+    #q:focus { border-color: #1f6feb; box-shadow: 0 0 0 3px rgba(31,111,235,0.2); }
+    #result-container { flex-grow: 1; margin-top: 5px; text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+    #abbrev-text { font-size: 11px; color: #000; font-weight: 400; margin-bottom: 2px; height: 1.2em; }
+    #display-text { font-size: 18px; color: #1f6feb; font-weight: 600; line-height: 1.2; }
+    #example-text { font-size: 13px; color: #666; font-style: italic; margin-top: 4px; min-height: 1.2em; }
+    /* Updated opt class to allow dynamic border colors */
+    .opt { font-size: 11px; color: #444; background: #fff; border-radius: 4px; padding: 2px 8px; margin: 2px; display: inline-block; border: 2px solid gray; }
+    #footer { font-size: 10px; color: #888; border-top: 1px solid #ddd; padding-top: 8px; display: flex; justify-content: space-between; opacity: 0.8; }
+</style></head>
+<body data-kmwindow="SCREENVISIBLE(Main,MidX)-200,SCREENVISIBLE(Main,MidY)-120,400,240">
+    <input type="search" id="q" placeholder="Type abbreviation..." autofocus autocomplete="off" spellcheck="false">
+    <div id="result-container">
+        <div id="abbrev-text"></div>
+        <div id="display-text"></div>
+        <div id="example-text"></div>
+        <div id="options" style="margin-top:10px;"></div>
+    </div>
+    <div id="footer">
+        <span>Find String v3.8 | Filters: All</span>
+        <span>Entries: 99</span>
+    </div>
+    <script>
+        const mapping = {"date": {"val": "98D0D3C3-3955-41EF-AB26-15296632D168", "type": "macro", "ex": "2/20/22", "lbl": "date", "clr": "blue"}, "datel": {"val": "F4AFC8AE-4D7B-4F99-956B-1E0714E6EAD0", "type": "macro", "ex": "January 24, 2026", "lbl": "date long", "clr": "red"}, "dates": {"val": "BF79CC2A-E917-47F8-ACF5-89563B8606AB", "type": "macro", "ex": "Sun, Feb 20", "lbl": "date short", "clr": "gray"}, "dateb": {"val": "977AF02A-B23C-430E-86ED-630EB7640537", "type": "macro", "ex": "22-02-20", "lbl": "date backward", "clr": "gray"}, "time": {"val": "Feel free to throw some time on my calendar where you see an opening.", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "addr": {"val": "79 Chandler St., Apt. 7", "type": "string", "ex": "79 Chandler St.", "lbl": "street: 79 Chandler", "clr": "gray"}, "addrf": {"val": "79 Chandler St., Apt. 7, Boston, MA 02116", "type": "string", "ex": "79 Chandler + Boston", "lbl": "street + city", "clr": "gray"}, "addry": {"val": "10 Rams Head Lane, York, ME 03909-5171", "type": "string", "ex": "10 Rams Head Ln", "lbl": "", "clr": "gray"}, "zip": {"val": "02116", "type": "string", "ex": "02116", "lbl": "", "clr": "gray"}, "zipy": {"val": "03909-5171", "type": "string", "ex": "03909-5171", "lbl": "", "clr": "gray"}, "eg": {"val": "steve.vinter@gmail.com", "type": "string", "ex": "email stv", "lbl": "", "clr": "gray"}, "eh": {"val": "steve@vinterfamily.com", "type": "string", "ex": "email home", "lbl": "", "clr": "gray"}, "psv": {"val": "508-361-8530", "type": "string", "ex": "phone stv", "lbl": "", "clr": "gray"}, "pkpv": {"val": "774-217-3794", "type": "string", "ex": "phone kpv", "lbl": "", "clr": "gray"}, "ppgv": {"val": "508-320-5433", "type": "string", "ex": "phone pgv", "lbl": "", "clr": "gray"}, "pggv": {"val": "508-320-1126", "type": "string", "ex": "phone ggv", "lbl": "", "clr": "gray"}, "pcov": {"val": "914-907-2243", "type": "string", "ex": "phone cov", "lbl": "", "clr": "gray"}, "iah": {"val": "Alan Harlam", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "icv": {"val": "Caitlin Vinter", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "igv": {"val": "Galen Vinter", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "ikv": {"val": "Katie Vinter", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "ipgv": {"val": "Patricia G. Vinter", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "ipv": {"val": "Pat Vinter", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "istv": {"val": "Stephen T. Vinter", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "isv": {"val": "Steve Vinter", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "router": {"val": "vintersinthesouthend", "type": "string", "ex": "", "lbl": "router", "clr": "gray"}, "passp exp": {"val": "6/01/35", "type": "string", "ex": "", "lbl": "passport expiry", "clr": "gray"}, "passp stv": {"val": "545738685", "type": "string", "ex": "", "lbl": "passport STV", "clr": "gray"}, "passp pgv": {"val": "545738619", "type": "string", "ex": "", "lbl": "passport PGV", "clr": "gray"}, "global stv": {"val": "985115691", "type": "string", "ex": "", "lbl": "global entry STV", "clr": "gray"}, "global pgv": {"val": "S84350448", "type": "string", "ex": "", "lbl": "dl STV drivers license", "clr": "gray"}, "equinox id": {"val": "3598052", "type": "string", "ex": "", "lbl": "equinox id", "clr": "gray"}, "ssn": {"val": "384685546", "type": "string", "ex": "", "lbl": "social security", "clr": "gray"}, "router pw": {"val": "vintersathome", "type": "string", "ex": "", "lbl": "vintersathome", "clr": "gray"}, "BP Routing": {"val": "011002343", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "BP Account": {"val": "2079941", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "xxx": {"val": "ADE480BE-FA12-4CBC-8BD4-2C33566D83DE", "type": "macro", "ex": "", "lbl": "open-kbm - Find macro", "clr": "gray"}, "cb": {"val": "9721B292-25CE-4E54-AE6D-449D2295DE3C", "type": "macro", "ex": "", "lbl": "Claude brief", "clr": "gray"}, "folder": {"val": "\u0192older", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "kbm": {"val": "Keyboard Maestro", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "kbm forum": {"val": "https://forum.keyboardmaestro.com/", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "vin Hyundai": {"val": "5YJYGDEE6LF013268", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "venmo": {"val": "@Steve-Vinter, phone confirmation: 508-361-8530", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "ll": {"val": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "yt": {"val": "hi, yt?", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "km": {"val": "Keyboard Maestro", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "hope": {"val": "Hope you're doing well!", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "intro": {"val": "Thanks for the introduction, xxx! (to bcc:)", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "coaching intro": {"val": "Even though my coaching is offered to you, I never assume that this is the right path\u2014we can use this conversation to figure out whether it is.", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "sorry": {"val": "sorry for the inconvenience!", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "rj": {"val": "Restorative Justice", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "er": {"val": "Emacs Reference Manual", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "ob": {"val": "Obsidian", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "bw": {"val": "09409946-4D02-4590-89C5-929570485BB0", "type": "macro", "ex": "", "lbl": "best, +schedule link", "clr": "gray"}, "b": {"val": "3B4BEC6D-B86E-48FA-B83C-67D8447E6C22", "type": "macro", "ex": "", "lbl": "best, ...", "clr": "gray"}, "ht": {"val": "https://", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "maven pw": {"val": "D2057449-0E5A-4027-85AD-FCC5333C3A97", "type": "string", "ex": "", "lbl": "maven network pw", "clr": "gray"}, "stv": {"val": "Stephen Vinter", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "s.v": {"val": "steve.vinter", "type": "string", "ex": "", "lbl": "name", "clr": "gray"}, "sv": {"val": "Steve Vinter", "type": "string", "ex": "", "lbl": "name", "clr": "gray"}, "ap": {"val": "Anthony Philippakis", "type": "string", "ex": "", "lbl": "name", "clr": "gray"}, "lk": {"val": "Leonidas Kontothanassis", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "gv": {"val": "Google Ventures", "type": "string", "ex": "", "lbl": "name", "clr": "gray"}, "ic": {"val": "InspireCorps", "type": "string", "ex": "", "lbl": "name", "clr": "gray"}, "jc": {"val": "Jonathan Corbin", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "jh": {"val": "Jheison", "type": "string", "ex": "", "lbl": "name", "clr": "gray"}, "cfs": {"val": "Commonwealth Fusion Systems", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "ck": {"val": "\u2713", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "dh dash": {"val": "\u23af", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "dashes": {"val": "\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014\u2014", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "mods": {"val": "\u21e7\u2318\u2303\u2325", "type": "string", "ex": "", "lbl": "all modifiers", "clr": "gray"}, "brk": {"val": "", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "sq": {"val": "'   single quote", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "bar": {"val": "", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "clip": {"val": "%SystemClipboard%", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "var": {"val": "%Variable%%", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "varl": {"val": "%Variable%local%", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "app": {"val": "%Application%1%", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "prompt": {"val": "%PromptButton%", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "trig": {"val": "%TriggerValue%", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "json": {"val": "%JSONValue%localValues.%Variable%localValue%%", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "esc": {"val": "\u25cf ESC \u25cf", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "exec uuid": {"val": "%%ExecutingMacroUUID%%", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "exec macro": {"val": "%%ExecutingMacro%%", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "chrome": {"val": "%%ChromeURL%%", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "trigmacro": {"val": "%kmtrigger://macro=<UUID>", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "tokens": {"val": "BE4B44D7-56C8-4926-964F-177DFA1BF3F2", "type": "macro", "ex": "", "lbl": "all kbm tokens", "clr": "gray"}, "arr": {"val": "\u2b06\ufe0e\u2b07\ufe0e\u2b05\ufe0e\u27a1\u2190\u2192\u2191\u2193\u27f7\u2b64\u21c4\u27fa\u2192", "type": "string", "ex": "", "lbl": "", "clr": "gray"}, "o": {"val": "\u2325", "type": "string", "ex": "\u2325", "lbl": "\u2325 option", "clr": "gray"}, "l": {"val": "\u2303", "type": "string", "ex": "\u2303", "lbl": "\u2303 control", "clr": "gray"}, "s": {"val": "\u21e7", "type": "string", "ex": "\u21e7", "lbl": "\u21e7 shift", "clr": "gray"}, "c": {"val": "\u2318", "type": "string", "ex": "\u2318", "lbl": "\u2318 command", "clr": "gray"}, "all": {"val": "D59F5040-1F25-4431-87BC-325AC87D1ED1", "type": "string", "ex": "", "lbl": "test all", "clr": "gray"}, "varr": {"val": "439F01D3-54A8-4983-933A-7BC5B18E0A11", "type": "string", "ex": "", "lbl": "test varr", "clr": "gray"}, "ttt": {"val": "64D24C42-B028-48FF-9BAE-CC129AFE21EA", "type": "string", "ex": "yesterday, today..", "lbl": "yesterday, today...", "clr": "gray"}};
+        const input = document.getElementById('q'), 
+              abrDiv = document.getElementById('abbrev-text'),
+              valDiv = document.getElementById('display-text'), 
+              exDiv = document.getElementById('example-text'), 
+              optDiv = document.getElementById('options');
+        
+        let currentActiveKey = null;
+
+        input.addEventListener('input', () => {
+            const typed = input.value;
+            abrDiv.textContent = ""; valDiv.textContent = ""; exDiv.textContent = ""; optDiv.innerHTML = "";
+            currentActiveKey = null;
+            
+            if (typed.length > 0) {
+                let matches = Object.keys(mapping).filter(k => k.startsWith(typed));
+                if (matches.length >= 1) {
+                    matches.sort((a, b) => a.length - b.length);
+                    currentActiveKey = mapping[typed] ? typed : matches[0];
+                    const entry = mapping[currentActiveKey];
+                    
+                    abrDiv.textContent = currentActiveKey;
+                    valDiv.textContent = (entry.lbl && entry.lbl.trim() !== "") ? entry.lbl : entry.val;
+                    if (entry.ex && entry.ex.trim() !== "") exDiv.textContent = entry.ex;
+                    
+                    // Show other options with their specific colored outlines
+                    matches.forEach(m => {
+                        const matchEntry = mapping[m];
+                        const s = document.createElement('span'); 
+                        s.className = 'opt'; 
+                        s.textContent = m;
+                        // Apply the color to the border
+                        s.style.borderColor = matchEntry.clr;
+                        // Bold the currently active one
+                        if (m === currentActiveKey) {
+                            s.style.fontWeight = "bold";
+                            s.style.boxShadow = "0 0 2px " + matchEntry.clr;
+                        }
+                        optDiv.appendChild(s);
+                    });
+                }
+            }
+        });
+        
+        window.addEventListener('keydown', (e) => {
+            if (e.key === "Enter") {
+                if (currentActiveKey && mapping[currentActiveKey]) {
+                    const activeMatch = mapping[currentActiveKey];
+                    input.blur();
+                    window.KeyboardMaestro.SetVariable("MyFindResults", activeMatch.val);
+                    window.KeyboardMaestro.SetVariable("MyFindType", activeMatch.type);
+                    window.KeyboardMaestro.Submit("OK");
+                }
+            }
+            if (e.key === "Escape") {
+                window.KeyboardMaestro.SetVariable("MyFindResults", "");
+                window.KeyboardMaestro.SetVariable("MyFindType", "");
+                window.KeyboardMaestro.Cancel("User Cancelled Prompt");
+            }
+        });
+    </script>
+</body></html>

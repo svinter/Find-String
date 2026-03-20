@@ -1,0 +1,31 @@
+# 1. Filter      | The category key (e.g., global, dates) used to narrow search via MyStringFilter.
+# 2. Abbrev      | The trigger string (min. 2 chars) you type into the prompt to find the entry.
+# 3. Example     | Optional text displayed in small italics below the main result in the prompt.
+# 4. Type        | A label for the data format (e.g., .macro, .email); ignored by display logic.
+# 5. Value       | The actual data returned to Keyboard Maestro's MyFindResults variable.
+# 6. Label       | Optional. if present, this text replaces the Value in the large blue display.
+# 7. Color       | Optional. CSS color value; if missing, "gray" is used
+
+# filter   abbrev         example                  type      value                                  label                      color
+#-------  ----------     -----------------------  --------  -------------------------------------- --------------------      ------------------
+# email  | eg             | personal               | string  | steve@gmail.com                      |                         | 
+# global | date           | today                  | macro   | 98D0D3C3-3955-41EF-AB26-15296632D168 | today's date            | blue
+#
+#             first:  steve@gmail.com (Large Blue) and "personal" (Small Italics)
+#             second: an entry with Label Override
+# 
+# if 'example' is missing, nothing is displayed in its place
+# if 'color'   is missing, gray is used
+
+## GLOBAL
+
+# dates
+
+# filter   abbrev         example                  type      value                                  label                      color
+#-------  ----------     -----------------------  --------  -------------------------------------- --------------------      ------------------
+global    |  date        | 2/20/22                | macro   | 98D0D3C3-3955-41EF-AB26-15296632D168 | date                    | blue
+global    |  ck          |          		  | string  | ✓   				   |
+global    |  dh dash     |          		  | string  | ⎯   				   | 
+global    |  dashes      |          		  | string  | ———————————   			   | 
+global    |  mods        |          		  | string  | ⇧⌘⌃⌥   				   | all modifiers
+kbm       |  clip        |          		  | string  | %SystemClipboard%                    | 
